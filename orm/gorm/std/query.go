@@ -2,8 +2,8 @@ package std
 
 import (
 	"reflect"
-	"go-kit-micro-service/logs"
 
+	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
@@ -12,16 +12,14 @@ type QueryObject interface {
 	NewContainer() interface{}
 }
 
-func NewQs(object QueryObject, filters map[string]interface{}) (*gorm.DB, error) {
-	db := GetDB()
-
+func NewQs(db *gorm.DB, object QueryObject, filters map[string]interface{}) (*gorm.DB, error) {
 	if len(filters) == 0 {
 		return db, nil
 	}
 
 	cond, vals, err := WhereBuild(filters)
 	if nil != err {
-		logs.Error(err)
+		logrus.Error(err)
 		return nil, err
 	}
 	return db.Model(object.NewModel()).Where(cond, vals...), nil
@@ -41,7 +39,7 @@ func QueryModel(object QueryObject, filters map[string]interface{}, orderby []st
 	qs = qs.Limit(limit).Offset(offset)
 	result := qs.Find(container)
 	if nil != result.Error {
-		logs.Error(result.Error)
+		logrus.Error(result.Error)
 	}
 	return container, result.Error
 }
@@ -62,7 +60,7 @@ func QueryModelWithTotal(object QueryObject, filters map[string]interface{}, ord
 	qs = qs.Limit(limit).Offset(offset)
 	result := qs.Find(container)
 	if nil != result.Error {
-		logs.Error(result.Error)
+		logrus.Error(result.Error)
 	}
 	return total, container, result.Error
 }
@@ -97,7 +95,7 @@ func QueryModelFromChan(object QueryObject, filters map[string]interface{}, orde
 			qs = qs.Limit(limitmax).Offset(offset)
 			result := qs.Find(container)
 			if result.Error != nil {
-				logs.Errorf("Error query table : %v, err : %v", reflect.TypeOf(object.NewModel()), err)
+				logrus.Errorf("Error query table : %v, err : %v", reflect.TypeOf(object.NewModel()), err)
 			}
 			ch <- container
 			if result.RowsAffected < int64(limitmax) {

@@ -3,6 +3,7 @@ package std
 import (
 	"fmt"
 	"strings"
+	"time"
 )
 
 type NullType byte
@@ -14,6 +15,11 @@ const (
 	// IsNotNull the same as `is not null`
 	IsNotNull
 )
+
+func DateFormat(t time.Time) string {
+	dateFmt := "2006-01-02"
+	return fmt.Sprintf("%v", t.Format(dateFmt))
+}
 
 // sql build where
 func WhereBuild(where map[string]interface{}) (whereSQL string, vals []interface{}, err error) {

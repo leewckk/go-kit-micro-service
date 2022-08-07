@@ -1,11 +1,9 @@
 package std
 
 import (
-	"fmt"
-	"go-kit-micro-service/configure"
-	"go-kit-micro-service/logs"
 	"time"
 
+	"github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -15,31 +13,30 @@ const (
 	DateTimeFmt = "2006-01-02 15:04:05"
 )
 
-var (
-	__db__ *gorm.DB
-)
+// var (
+// 	__db__ *gorm.DB
+// )
 
-func init() {
-	__db__ = createDB()
-}
+// func init() {
+// 	__db__ = createDB()
+// }
 
-func createDB() *gorm.DB {
+// func createDB() *gorm.DB {
 
-	conf := configure.GetDefault().Config()
-	conn := conf.Db.Conn
-	driver := conf.Db.Driver
-	debug := conf.Db.Debug
+// 	conf := configure.GetDefault().Config()
+// 	conn := conf.Db.Conn
+// 	driver := conf.Db.Driver
+// 	debug := conf.Db.Debug
 
-	if "" == conn {
-		// dir, _ := os.Getwd()
-		panic(fmt.Sprintf("Failed found database conn from config file ,config path: %v", configure.GetDefault().Uri))
-	}
-	return NewDB(conn, driver, debug)
-}
+// 	if "" == conn {
+// 		panic(fmt.Sprintf("Failed found database conn from config file ,config path: %v", configure.GetDefault().Uri))
+// 	}
+// 	return NewDB(conn, driver, debug)
+// }
 
 func NewDB(conn string, driver string, debug bool) *gorm.DB {
 
-	logs.Info("try to connect ", driver, " conn: ", conn)
+	logrus.Info("try to connect ", driver, " conn: ", conn)
 	db, err := gorm.Open(mysql.Open(conn), &gorm.Config{
 		QueryFields: true,
 	})
@@ -59,19 +56,14 @@ func NewDB(conn string, driver string, debug bool) *gorm.DB {
 	return db
 }
 
-func GetDB() *gorm.DB {
-	sqlDB, err := __db__.DB()
-	if nil != err {
-		__db__ = createDB()
-	}
-	if err := sqlDB.Ping(); err != nil {
-		sqlDB.Close()
-		__db__ = createDB()
-	}
-	return __db__
-}
-
-func DateFormat(t time.Time) string {
-	dateFmt := "2006-01-02"
-	return fmt.Sprintf("%v", t.Format(dateFmt))
-}
+// func GetDB() *gorm.DB {
+// 	sqlDB, err := __db__.DB()
+// 	if nil != err {
+// 		__db__ = createDB()
+// 	}
+// 	if err := sqlDB.Ping(); err != nil {
+// 		sqlDB.Close()
+// 		__db__ = createDB()
+// 	}
+// 	return __db__
+// }

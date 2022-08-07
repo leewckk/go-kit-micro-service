@@ -1,14 +1,13 @@
 package std
 
 import (
-	"go-kit-micro-service/logs"
-
+	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
-func InsertLock(list interface{}) (interface{}, error) {
+func InsertLock(db *gorm.DB, list interface{}) (interface{}, error) {
 
-	db := GetDB()
 	tx := db.Begin()
 	defer func() {
 		if r := recover(); nil != r {
@@ -24,7 +23,7 @@ func InsertLock(list interface{}) (interface{}, error) {
 		}).Create(list)
 
 	if nil != result.Error {
-		logs.Errorf("Error insert record, err : %v ", result.Error)
+		logrus.Errorf("Error insert record, err : %v ", result.Error)
 		tx.Rollback() //// 事务回滚
 		return list, result.Error
 	}
@@ -34,16 +33,15 @@ func InsertLock(list interface{}) (interface{}, error) {
 	return list, err
 }
 
-func Insert(list interface{}) (interface{}, error) {
+func Insert(db *gorm.DB, list interface{}) (interface{}, error) {
 
-	db := GetDB()
 	result := db.Clauses(
 		clause.OnConflict{
 			UpdateAll: true,
 		}).Create(list)
 
 	if nil != result.Error {
-		logs.Errorf("Error insert record, err : %v ", result.Error)
+		logrus.Errorf("Error insert record, err : %v ", result.Error)
 		return list, result.Error
 	}
 
