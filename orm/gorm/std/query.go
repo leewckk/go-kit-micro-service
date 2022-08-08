@@ -25,10 +25,10 @@ func NewQs(db *gorm.DB, object QueryObject, filters map[string]interface{}) (*go
 	return db.Model(object.NewModel()).Where(cond, vals...), nil
 }
 
-func QueryModel(object QueryObject, filters map[string]interface{}, orderby []string, limit, offset int) (interface{}, error) {
+func QueryModel(db *gorm.DB, object QueryObject, filters map[string]interface{}, orderby []string, limit, offset int) (interface{}, error) {
 
 	container := object.NewContainer()
-	qs, err := NewQs(object, filters)
+	qs, err := NewQs(db, object, filters)
 	if nil != err {
 		return container, err
 	}
@@ -44,11 +44,11 @@ func QueryModel(object QueryObject, filters map[string]interface{}, orderby []st
 	return container, result.Error
 }
 
-func QueryModelWithTotal(object QueryObject, filters map[string]interface{}, orderby []string, limit, offset int) (int64, interface{}, error) {
+func QueryModelWithTotal(db *gorm.DB, object QueryObject, filters map[string]interface{}, orderby []string, limit, offset int) (int64, interface{}, error) {
 
 	var total int64
 	container := object.NewContainer()
-	qs, err := NewQs(object, filters)
+	qs, err := NewQs(db, object, filters)
 	if nil != err {
 		return 0, container, err
 	}
@@ -65,7 +65,7 @@ func QueryModelWithTotal(object QueryObject, filters map[string]interface{}, ord
 	return total, container, result.Error
 }
 
-func QueryModelFromChan(object QueryObject, filters map[string]interface{}, orderby []string, limit, offset int) chan interface{} {
+func QueryModelFromChan(db *gorm.DB, object QueryObject, filters map[string]interface{}, orderby []string, limit, offset int) chan interface{} {
 
 	ch := make(chan interface{}, 0)
 	go func() {
@@ -74,7 +74,7 @@ func QueryModelFromChan(object QueryObject, filters map[string]interface{}, orde
 		}()
 
 		limitmax := 1000
-		qs, err := NewQs(object, filters)
+		qs, err := NewQs(db, object, filters)
 		if nil != err {
 			return
 		}
