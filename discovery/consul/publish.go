@@ -46,8 +46,8 @@ func NewPublish(host string, port int, regtype string) *Publish {
 func (this *Publish) NewRegistration(instanceId, instanceName string, instanceIP, healthAPI string, port int, regtype string) *api.AgentServiceRegistration {
 
 	check := api.AgentServiceCheck{
-		DeregisterCriticalServiceAfter: "5s",
-		Interval:                       "5s",
+		DeregisterCriticalServiceAfter: "15s",
+		Interval:                       "10s",
 		Timeout:                        "1s",
 		Notes:                          fmt.Sprintf("%v %v service", instanceName, regtype),
 	}
