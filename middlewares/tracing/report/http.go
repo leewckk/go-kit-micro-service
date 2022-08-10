@@ -4,7 +4,7 @@ import (
 	"github.com/go-kit/kit/tracing/zipkin"
 	kithttp "github.com/go-kit/kit/transport/http"
 	gintracing "github.com/leewckk/go-kit-micro-service/middlewares/tracing/gin"
-	ginhttp "github.com/leewckk/go-kit-micro-service/middlewares/transport/http/gin"
+	ginhttp "github.com/leewckk/go-kit-micro-service/middlewares/transport/http"
 	opzipkin "github.com/openzipkin/zipkin-go"
 	"github.com/openzipkin/zipkin-go/reporter"
 )

@@ -11,7 +11,7 @@ import (
 	"github.com/openzipkin/zipkin-go/propagation/b3"
 
 	kithttp "github.com/go-kit/kit/transport/http"
-	ginhttp "github.com/leewckk/go-kit-micro-service/middlewares/transport/http/gin"
+	ginhttp "github.com/leewckk/go-kit-micro-service/middlewares/transport/http"
 )
 
 // HTTPServerTrace enables native Zipkin tracing of a Go kit HTTP transport
