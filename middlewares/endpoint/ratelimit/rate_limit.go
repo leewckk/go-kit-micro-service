@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	DEFAULT_TOKEN_BUCKET_CAPACITY = 1e6
+	DEFAULT_TOKEN_BUCKET_CAPACITY = 1e5
 )
 
 //// 不限流
