@@ -26,7 +26,8 @@ import (
 	"net"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	"google.golang.org/grpc"
+	// "google.golang.org/grpc"
+	"github.com/go-kit/kit/transport/grpc"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
@@ -46,7 +47,7 @@ type RegisterRouteProc func(s *grpc.Server, opts ...grpc.ServerOption)
 func NewRouter(name string, opts ...RouterOption) *Router {
 
 	r := &Router{
-		name:          name,
+		name:          name + ".grpc",
 		grpcOpts:      make([]grpc.ServerOption, 0, 0),
 		routerOpts:    make([]RouterOption, 0, 0),
 		registerProcs: make([]RegisterRouteProc, 0, 0),
