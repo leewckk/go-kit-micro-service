@@ -21,3 +21,72 @@
 // SOFTWARE.
 
 package client
+
+import (
+	"io"
+	"net/url"
+	"strings"
+	"time"
+
+	"github.com/go-kit/kit/endpoint"
+	"github.com/go-kit/kit/sd"
+	"github.com/go-kit/kit/sd/consul"
+	"github.com/go-kit/kit/sd/lb"
+	kithttp "github.com/go-kit/kit/transport/http"
+	"github.com/leewckk/go-kit-micro-service/discovery"
+	"github.com/leewckk/go-kit-micro-service/log"
+)
+
+func NewFactory(
+	method string,
+	api string,
+	enc kithttp.EncodeRequestFunc,
+	dec kithttp.DecodeResponseFunc,
+	opts ...kithttp.ClientOption,
+) sd.Factory {
+
+	return func(instance string) (endpoint.Endpoint, io.Closer, error) {
+
+		if !strings.HasPrefix(instance, "http") {
+			instance = "http://" + instance
+		}
+		target, err := url.Parse(instance)
+		if nil != err {
+			panic(err)
+		}
+		target.Path = api
+
+		// opts := make([]kithttp.ClientOption, 0, 0)
+		// reporter := tracing.NewReporter()
+		// if nil != reporter {
+		// 	opts = append(opts, tracing.NewHttpClientTracer(reporter))
+		// }
+
+		return kithttp.NewClient(
+			method,
+			target,
+			enc, dec,
+			opts...,
+		).Endpoint(), nil, nil
+	}
+}
+
+func MakeClientEndpoint(sdapi, serverName, methodName, api string, enc kithttp.EncodeRequestFunc, dec kithttp.DecodeResponseFunc, opts ...kithttp.ClientOption) endpoint.Endpoint {
+
+	logger := log.NewLogger()
+	client := discovery.NewClient(sdapi)
+	serverName = serverName + ".http"
+
+	passingOnly := true
+	duration := 120 * time.Second
+	instancer := consul.NewInstancer(client, logger, serverName, []string{}, passingOnly)
+
+	factory := NewFactory(methodName, api, enc, dec, opts...)
+	ep := sd.NewEndpointer(instancer,
+		factory,
+		logger,
+	)
+	balancer := lb.NewRoundRobin(ep)
+	retry := lb.Retry(3, duration, balancer)
+	return retry
+}
