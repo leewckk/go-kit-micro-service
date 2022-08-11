@@ -31,7 +31,6 @@ import (
 	"github.com/go-kit/kit/sd/consul"
 	"github.com/go-kit/kit/sd/lb"
 	gokitgrpc "github.com/go-kit/kit/transport/grpc"
-	"github.com/leewckk/go-kit-micro-service/discovery"
 	"github.com/leewckk/go-kit-micro-service/log"
 )
 
@@ -68,8 +67,17 @@ func NewFactory(
 	}
 }
 
-func MakeClientEndpoint(sdapi string, serverName, serviceName string, methodName string, enc gokitgrpc.EncodeRequestFunc, dec gokitgrpc.DecodeResponseFunc, reply interface{}, opts ...gokitgrpc.ClientOption) endpoint.Endpoint {
-	client := discovery.NewClient(sdapi)
+func MakeClientEndpoint(
+	client consul.Client,
+	serverName string,
+	serviceName string,
+	methodName string,
+	enc gokitgrpc.EncodeRequestFunc,
+	dec gokitgrpc.DecodeResponseFunc,
+	reply interface{},
+	opts ...gokitgrpc.ClientOption) endpoint.Endpoint {
+
+	// client := discovery.NewClient(sdapi)
 	serverName += ".grpc"
 	passingOnly := true
 	duration := 120 * time.Second

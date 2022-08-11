@@ -33,7 +33,6 @@ import (
 	"github.com/go-kit/kit/sd/consul"
 	"github.com/go-kit/kit/sd/lb"
 	kithttp "github.com/go-kit/kit/transport/http"
-	"github.com/leewckk/go-kit-micro-service/discovery"
 	"github.com/leewckk/go-kit-micro-service/log"
 )
 
@@ -71,10 +70,17 @@ func NewFactory(
 	}
 }
 
-func MakeClientEndpoint(sdapi, serverName, methodName, api string, enc kithttp.EncodeRequestFunc, dec kithttp.DecodeResponseFunc, opts ...kithttp.ClientOption) endpoint.Endpoint {
+func MakeClientEndpoint(
+	client consul.Client,
+	serverName string,
+	methodName string,
+	api string,
+	enc kithttp.EncodeRequestFunc,
+	dec kithttp.DecodeResponseFunc,
+	opts ...kithttp.ClientOption) endpoint.Endpoint {
 
 	logger := log.NewLogger()
-	client := discovery.NewClient(sdapi)
+	// client := discovery.NewClient(sdapi)
 	serverName = serverName + ".http"
 
 	passingOnly := true
