@@ -3,7 +3,7 @@ package main
 import (
 	"time"
 
-	"github.com/leewckk/go-kit-micro-service/orm/gorm/std"
+	std "github.com/leewckk/go-kit-micro-service/orm/gorm"
 )
 
 type User struct {
