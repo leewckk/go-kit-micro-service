@@ -32,7 +32,7 @@ import (
 var (
 	DEFAULT_HTTP_VERSION_V1 = "/v1"
 	DEFAULT_HTTP_HEART_BEAT = "/actuator"
-	DEFAULT_HTTP_HEALTH_API = DEFAULT_HTTP_HEART_BEAT + "/info"
+	DEFAULT_HTTP_HEALTH_API = "/info"
 )
 
 type Router struct {
