@@ -36,22 +36,22 @@ var (
 )
 
 type Router struct {
-	apiver    string
-	healthApi string
-	healthGrp string
-	healthSvc *http.RouterObject
-	engine    *gin.Engine
-	objects   []http.RouterObject
-	// serverOpts []http.ServerOption
+	apiver        string
+	healthApi     string
+	healthGrp     string
+	healthSvc     *http.RouterObject
+	engine        *gin.Engine
+	registerProcs []RegisterRouteProc
+	serverOpts    []http.ServerOption
 }
 
 func NewRouter(bing string, routerOpts ...RouterOption) *Router {
 	r := Router{
-		apiver:    DEFAULT_HTTP_VERSION_V1,
-		healthApi: DEFAULT_HTTP_HEALTH_API,
-		engine:    gin.Default(),
-		// serverOpts: make([]http.ServerOption, 0, 0),
-		objects: make([]http.RouterObject, 0, 0),
+		apiver:        DEFAULT_HTTP_VERSION_V1,
+		healthApi:     DEFAULT_HTTP_HEALTH_API,
+		engine:        gin.Default(),
+		serverOpts:    make([]http.ServerOption, 0, 0),
+		registerProcs: make([]RegisterRouteProc, 0, 0),
 	}
 
 	for _, opt := range routerOpts {
@@ -61,20 +61,21 @@ func NewRouter(bing string, routerOpts ...RouterOption) *Router {
 }
 
 type RouterOption func(r *Router)
+type RegisterRouteProc func(r *Router, opts ...http.ServerOption)
 
 //// config import routers
-func RouterImport(objs ...http.RouterObject) RouterOption {
+func RouterProcs(procs ...RegisterRouteProc) RouterOption {
 	return func(r *Router) {
-		r.objects = append(r.objects, objs...)
+		r.registerProcs = append(r.registerProcs, procs...)
 	}
 }
 
-// /// server options
-// func RouterServerOptions(serverOpts ...http.ServerOption) RouterOption {
-// 	return func(r *Router) {
-// 		r.serverOpts = append(r.serverOpts, serverOpts...)
-// 	}
-// }
+/// server options
+func RouterServerOptions(serverOpts ...http.ServerOption) RouterOption {
+	return func(r *Router) {
+		r.serverOpts = append(r.serverOpts, serverOpts...)
+	}
+}
 
 //// heartbeat config
 func RouterHealth(group string, healthAPI string, svc *http.RouterObject) RouterOption {
@@ -92,43 +93,46 @@ func RouterVersion(ver string) RouterOption {
 	}
 }
 
-func (r *Router) registerServices() error {
+func (r *Router) HealthAPI() string {
+	return r.healthGrp + r.healthApi
+}
 
-	for _, obj := range r.objects {
+func (r *Router) Register(obj *http.RouterObject) error {
 
-		obj.Pattern = r.apiver + obj.Pattern
-		if obj.HttpMethod == nethttp.MethodGet {
-			r.engine.GET(obj.Pattern, obj.Handler)
-			continue
-		}
+	uri := r.apiver + obj.Pattern
 
-		if obj.HttpMethod == nethttp.MethodPut {
-			r.engine.PUT(obj.Pattern, obj.Handler)
-			continue
-		}
-
-		if obj.HttpMethod == nethttp.MethodPost {
-			r.engine.POST(obj.Pattern, obj.Handler)
-			continue
-		}
-
-		if obj.HttpMethod == nethttp.MethodPatch {
-			r.engine.PATCH(obj.Pattern, obj.Handler)
-			continue
-		}
-
-		if obj.HttpMethod == nethttp.MethodDelete {
-			r.engine.DELETE(obj.Pattern, obj.Handler)
-			continue
-		}
+	if obj.HttpMethod == nethttp.MethodGet {
+		r.engine.GET(uri, obj.Handler)
+		return nil
 	}
 
+	if obj.HttpMethod == nethttp.MethodPut {
+		r.engine.PUT(uri, obj.Handler)
+		return nil
+	}
+
+	if obj.HttpMethod == nethttp.MethodPost {
+		r.engine.POST(uri, obj.Handler)
+		return nil
+	}
+
+	if obj.HttpMethod == nethttp.MethodPatch {
+		r.engine.PATCH(uri, obj.Handler)
+		return nil
+	}
+
+	if obj.HttpMethod == nethttp.MethodDelete {
+		r.engine.DELETE(uri, obj.Handler)
+		return nil
+	}
 	return nil
 }
 
 func (r *Router) Run(bind string) error {
 
-	r.registerServices()
+	for _, proc := range r.registerProcs {
+		proc(r, r.serverOpts...)
+	}
 
 	//// register health api
 	if nil != r.healthSvc {

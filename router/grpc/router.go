@@ -27,23 +27,29 @@ import (
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/health/grpc_health_v1"
+	"google.golang.org/grpc/reflection"
 )
 
 type Router struct {
-	name       string
-	grpcOpts   []grpc.ServerOption
-	routerOpts []RouterOption
-	engine     *grpc.Server
+	name          string
+	grpcOpts      []grpc.ServerOption
+	routerOpts    []RouterOption
+	registerProcs []RegisterRouteProc
+	engine        *grpc.Server
 }
 
 type RouterOption func(r *Router)
+type RegisterRouteProc func(s *grpc.Server, opts ...grpc.ServerOption)
 
 func NewRouter(name string, opts ...RouterOption) *Router {
 
 	r := &Router{
-		name:       name,
-		grpcOpts:   make([]grpc.ServerOption, 0, 0),
-		routerOpts: make([]RouterOption, 0, 0),
+		name:          name,
+		grpcOpts:      make([]grpc.ServerOption, 0, 0),
+		routerOpts:    make([]RouterOption, 0, 0),
+		registerProcs: make([]RegisterRouteProc, 0, 0),
 	}
 	r.grpcOpts = append(r.grpcOpts, grpc_middleware.WithUnaryServerChain(RecoveryInterceptor))
 
@@ -54,6 +60,35 @@ func NewRouter(name string, opts ...RouterOption) *Router {
 	return r
 }
 
+func RouterProcs(procs ...RegisterRouteProc) RouterOption {
+	return func(r *Router) {
+		r.registerProcs = append(r.registerProcs, procs...)
+	}
+}
+
+/// server options
+func RouterServerOptions(serverOpts ...grpc.ServerOption) RouterOption {
+	return func(r *Router) {
+		r.grpcOpts = append(r.grpcOpts, serverOpts...)
+	}
+}
+
+func (r *Router) HealthAPI() string {
+	return r.name
+}
+
 func (r *Router) Run(lis net.Listener) error {
+
+	for _, reg := range r.registerProcs {
+		if nil != reg {
+			reg(r.engine, r.grpcOpts...)
+		}
+	}
+
+	/// health
+	healthServer := health.NewServer()
+	healthServer.SetServingStatus(r.name, grpc_health_v1.HealthCheckResponse_SERVING)
+	grpc_health_v1.RegisterHealthServer(r.engine, healthServer)
+	reflection.Register(r.engine)
 	return r.engine.Serve(lis)
 }

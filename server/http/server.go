@@ -26,24 +26,22 @@ import (
 	"fmt"
 
 	"github.com/leewckk/go-kit-micro-service/discovery"
-	"github.com/leewckk/go-kit-micro-service/middlewares/tracing/report"
-	"github.com/leewckk/go-kit-micro-service/middlewares/transport/http"
 	router "github.com/leewckk/go-kit-micro-service/router/http"
 )
 
-func Run(r *router.Router, port int, serverName string, center string, centerPort int, sdapi string) chan error {
+func Run(r *router.Router, port int, serverName string, center string, centerPort int /*, sdapi string */) chan error {
 	errch := make(chan error)
 	go func() {
 		if port <= 0 {
 			errch <- fmt.Errorf("Invalid server port: %v", port)
 		}
-		opts := make([]http.ServerOption, 0, 0)
-		if "" != sdapi {
-			tr := report.NewZipkinReporter(sdapi)
-			opts = append(opts, report.NewGinServerTracer(tr))
-		}
+		// opts := make([]http.ServerOption, 0, 0)
+		// if "" != sdapi {
+		// 	tr := report.NewZipkinReporter(sdapi)
+		// 	opts = append(opts, report.NewGinServerTracer(tr))
+		// }
 
-		healthAPI := ""
+		healthAPI := r.HealthAPI()
 		pub, err := Publish(port, serverName, center, centerPort, healthAPI)
 		if nil == err && nil != pub {
 			defer pub.UnRegister()
