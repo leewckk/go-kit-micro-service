@@ -20,45 +20,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-package grpc
+package http
 
 import (
 	"fmt"
-	"net"
 
 	"github.com/leewckk/go-kit-micro-service/discovery"
-	router "github.com/leewckk/go-kit-micro-service/router/grpc"
 )
 
-func Run(r *router.Router, port int, serverName string, center string, centerPort int /*, sdapi string */) chan error {
+func Run(r *Router, port int, serverName string, center string, centerPort int /*, sdapi string */) chan error {
 	errch := make(chan error)
 	go func() {
-
 		if port <= 0 {
 			errch <- fmt.Errorf("Invalid server port: %v", port)
 		}
-
+		// opts := make([]http.ServerOption, 0, 0)
 		// if "" != sdapi {
-		// 	opts := make([]grpc.ServerOption, 0, 0)
 		// 	tr := report.NewZipkinReporter(sdapi)
-		// 	opts = append(opts, report.NewGrpcServerTracer(tr))
+		// 	opts = append(opts, report.NewGinServerTracer(tr))
 		// }
-		// router.RouterServerOptions(opts...)
 
 		healthAPI := r.HealthAPI()
 		pub, err := Publish(port, serverName, center, centerPort, healthAPI)
 		if nil == err && nil != pub {
 			defer pub.UnRegister()
 		}
-		lis, err := net.Listen("tcp", fmt.Sprintf(":%v", port))
-		if nil != err {
-			errch <- err
-		}
-		errch <- r.Run(lis)
+		errch <- r.Run(fmt.Sprintf(":%v", port))
 	}()
 	return errch
 }
 
 func Publish(port int, serverName string, center string, centerPort int, healthApi string) (discovery.Publisher, error) {
-	return discovery.Publish(center, centerPort, serverName, port, healthApi, "grpc")
+	return discovery.Publish(center, centerPort, serverName, port, healthApi, "http")
 }

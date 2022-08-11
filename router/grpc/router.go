@@ -25,9 +25,9 @@ package grpc
 import (
 	"net"
 
+	kitgrpc "github.com/go-kit/kit/transport/grpc"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	// "google.golang.org/grpc"
-	"github.com/go-kit/kit/transport/grpc"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
@@ -36,6 +36,7 @@ import (
 type Router struct {
 	name          string
 	grpcOpts      []grpc.ServerOption
+	serverOpts    []kitgrpc.ServerOption
 	routerOpts    []RouterOption
 	registerProcs []RegisterRouteProc
 	engine        *grpc.Server
@@ -68,9 +69,9 @@ func RouterProcs(procs ...RegisterRouteProc) RouterOption {
 }
 
 /// server options
-func RouterServerOptions(serverOpts ...grpc.ServerOption) RouterOption {
+func RouterServerOptions(serverOpts ...kitgrpc.ServerOption) RouterOption {
 	return func(r *Router) {
-		r.grpcOpts = append(r.grpcOpts, serverOpts...)
+		r.serverOpts = append(r.serverOpts, serverOpts...)
 	}
 }
 
