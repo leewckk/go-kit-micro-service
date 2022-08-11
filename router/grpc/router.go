@@ -43,7 +43,7 @@ type Router struct {
 }
 
 type RouterOption func(r *Router)
-type RegisterRouteProc func(s *grpc.Server, opts ...grpc.ServerOption)
+type RegisterRouteProc func(s *grpc.Server, opts ...kitgrpc.ServerOption)
 
 func NewRouter(name string, opts ...RouterOption) *Router {
 
@@ -83,7 +83,7 @@ func (r *Router) Run(lis net.Listener) error {
 
 	for _, reg := range r.registerProcs {
 		if nil != reg {
-			reg(r.engine, r.grpcOpts...)
+			reg(r.engine, r.serverOpts...)
 		}
 	}
 
