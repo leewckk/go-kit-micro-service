@@ -4,3 +4,6 @@
 [submodule "examples/client"]
 	path = examples/client
 	url = git@github.com:leewckk/go-kit-micro-client-example.git
+[submodule "template/service"]
+	path = template/service
+	url = https://github.com/leewckk/go-kit-micro-service-template.git
