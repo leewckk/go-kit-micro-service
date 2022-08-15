@@ -1,3 +1,5 @@
+# `go-kit-micro-service`
+
 `go-kit-micro-service`是基于项目[go kit](https://github.com/go-kit/kit)开发的微服务系统框架，集成了**服务注册/服务发现/负载均衡/限流/断流/链路追踪**等相关微服务治理的封装，可以通过插件[protoc-gen-gokit-micro](https://github.com/leewckk/protoc-gen-gokit-micro)实现业务代码以及接口`HTTP` + `GRPC`的自动生成，完成微服务应用的快速搭建。
 
 ## 功能概要
