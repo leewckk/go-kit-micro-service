@@ -11,14 +11,17 @@ type ChanRountineProc func(value interface{})
 type ChanRountine struct {
 	selectCase []reflect.SelectCase
 	rountine   []ChanRountineProc
+	step       time.Duration
 	lock       sync.Mutex
 }
 
-func NewChanRountine() *ChanRountine {
+func NewChanRountine(step time.Duration) *ChanRountine {
 	r := ChanRountine{
 		selectCase: make([]reflect.SelectCase, 0, 0),
 		rountine:   make([]ChanRountineProc, 0, 0),
+		step:       step,
 	}
+	go r.run()
 	return &r
 }
 
@@ -32,6 +35,9 @@ func (c *ChanRountine) run() {
 		chosen, receive, ok := reflect.Select(c.selectCase)
 		if ok && len(c.rountine) > chosen && c.rountine[chosen] != nil {
 			c.rountine[chosen](receive.Interface())
+		}
+		if c.step > 0 {
+			time.Sleep(c.step)
 		}
 	}
 }
