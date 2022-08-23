@@ -74,7 +74,8 @@ func MakeClientEndpoint(
 	methodName string,
 	enc gokitgrpc.EncodeRequestFunc,
 	dec gokitgrpc.DecodeResponseFunc,
-	reply interface{},
+	// reply interface{},
+	replyMaker func() interface{},
 	opts ...gokitgrpc.ClientOption) endpoint.Endpoint {
 
 	// client := discovery.NewClient(sdapi)
@@ -82,6 +83,7 @@ func MakeClientEndpoint(
 	passingOnly := true
 	duration := 120 * time.Second
 
+	reply := replyMaker()
 	instancer := consul.NewInstancer(client, log.NewLogger(), serverName, []string{}, passingOnly)
 	factory := NewFactory(NewConnection(), serviceName, methodName, enc, dec, reply, opts...)
 	ep := sd.NewEndpointer(instancer, factory, log.NewLogger())
