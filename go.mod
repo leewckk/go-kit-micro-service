@@ -13,7 +13,9 @@ require (
 	github.com/sirupsen/logrus v1.9.0
 	go.uber.org/ratelimit v0.2.0
 	golang.org/x/net v0.0.0-20210917221730-978cfadd31cf
+	google.golang.org/genproto v0.0.0-20210917145530-b395a37504d4
 	google.golang.org/grpc v1.41.0
+	google.golang.org/protobuf v1.28.0
 	gopkg.in/resty.v1 v1.12.0
 	gorm.io/driver/mysql v1.3.5
 	gorm.io/gorm v1.23.8

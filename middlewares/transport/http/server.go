@@ -94,6 +94,7 @@ func (s Server) ServerHTTP(gctx *gin.Context) {
 	w := http.ResponseWriter(gctx.Writer)
 	r := gctx.Request
 	ctx := gctx.Request.Context()
+	// ctx := gctx
 
 	if len(s.finalizer) > 0 {
 		iw := &interceptingWriter{w, http.StatusOK, 0}
@@ -118,7 +119,8 @@ func (s Server) ServerHTTP(gctx *gin.Context) {
 		return
 	}
 
-	response, err := s.e(ctx, request)
+	// response, err := s.e(ctx, request)
+	response, err := s.e(gctx, request)
 	if err != nil {
 		s.errorHandler.Handle(ctx, err)
 		s.errorEncoder(ctx, err, w)
