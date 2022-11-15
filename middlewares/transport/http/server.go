@@ -119,8 +119,10 @@ func (s Server) ServerHTTP(gctx *gin.Context) {
 		return
 	}
 
-	// response, err := s.e(ctx, request)
-	response, err := s.e(gctx, request)
+	/// 将header信息保存到context中
+	context.WithValue(ctx, "headers", gctx.Request.Header)
+	response, err := s.e(ctx, request)
+	// response, err := s.e(gctx, request)
 	if err != nil {
 		s.errorHandler.Handle(ctx, err)
 		s.errorEncoder(ctx, err, w)
