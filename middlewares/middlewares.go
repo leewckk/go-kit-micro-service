@@ -53,3 +53,12 @@ func InjectMiddleWares(e endpoint.Endpoint) endpoint.Endpoint {
 	}
 	return e
 }
+
+func InjectOptionalMiddlewares(ep endpoint.Endpoint, list []string) endpoint.Endpoint {
+	for _, name := range list {
+		if m, ok := optionalMiddlewares[name]; ok {
+			ep = m(ep)
+		}
+	}
+	return ep
+}
