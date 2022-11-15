@@ -24,15 +24,26 @@ package middlewares
 
 import "github.com/go-kit/kit/endpoint"
 
+const (
+	OPTIONAL_MIDDLEWARE_AUTH = "auth"
+)
+
 var (
 	endpointMiddlewares []endpoint.Middleware
+	optionalMiddlewares map[string]endpoint.Middleware
 )
 
 func init() {
+	optionalMiddlewares = make(map[string]endpoint.Middleware)
 }
 
 func ImportEndpointMiddlewares(wares ...endpoint.Middleware) error {
 	endpointMiddlewares = append(endpointMiddlewares, wares...)
+	return nil
+}
+
+func ImportOptionalMiddleWares(name string, mw endpoint.Middleware) error {
+	optionalMiddlewares[name] = mw
 	return nil
 }
 
