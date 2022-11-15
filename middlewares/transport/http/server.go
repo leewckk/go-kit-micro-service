@@ -120,7 +120,7 @@ func (s Server) ServerHTTP(gctx *gin.Context) {
 	}
 
 	/// 将header信息保存到context中
-	context.WithValue(ctx, "headers", gctx.Request.Header)
+	ctx = context.WithValue(ctx, "headers", gctx.Request.Header)
 	response, err := s.e(ctx, request)
 	// response, err := s.e(gctx, request)
 	if err != nil {
